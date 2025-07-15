@@ -1,4 +1,4 @@
-package org.example.CodeSignal
+package org.example.CodeSignal.Complexity_Analysis_Optimization
 
 fun solution(nums: List<Int>): Int {
     // nums Integer 리스트가 주어졌을 때, 각 요소 쌍에 차이 값 중 가장 작은 값을 구하시오.

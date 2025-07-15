@@ -1,4 +1,4 @@
-package org.example.CodeSignal
+package org.example.CodeSignal.Complexity_Analysis_Optimization
 
 import kotlin.math.*
 
