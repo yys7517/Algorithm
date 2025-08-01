@@ -1,5 +1,8 @@
 package org.example.Baekjoon.Bronze
 
+/**
+ * https://www.acmicpc.net/problem/10811
+ */
 import java.util.*
 
 fun main() {
