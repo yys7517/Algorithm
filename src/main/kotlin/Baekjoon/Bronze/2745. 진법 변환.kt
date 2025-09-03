@@ -1,5 +1,8 @@
 package org.example.Baekjoon.Bronze
 
+/**
+ * https://www.acmicpc.net/problem/2745
+ */
 import java.util.Scanner
 
 fun main() = with(Scanner(System.`in`)) {
@@ -10,7 +13,7 @@ fun main() = with(Scanner(System.`in`)) {
     println(answer)
 }
 
-/*
+/**
     1. 10진수를 N진수로 변환
     val decimalNumber = 123 // 10진수
     val binaryString = decimalNumber.toString(2) // 2진수로 변환
