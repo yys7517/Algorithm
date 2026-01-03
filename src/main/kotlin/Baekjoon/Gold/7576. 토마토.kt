@@ -2,7 +2,7 @@ package org.example.Baekjoon.Gold
 
 import java.util.*
 
-data class Dot(val x: Int, val y: Int, val day: Int)
+
 
 fun main(args: Array<String>) {
     val (m, n) = readLine()!!.split(" ").map { it.toInt() }
@@ -40,6 +40,8 @@ fun main(args: Array<String>) {
         print(0)
         return
     }
+
+    data class Dot(val x: Int, val y: Int, val day: Int)
 
     val queue = LinkedList<Dot>()
     val visited = Array(n) { BooleanArray(m) }
