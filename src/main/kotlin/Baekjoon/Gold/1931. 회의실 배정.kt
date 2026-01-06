@@ -33,6 +33,7 @@ fun main(args: Array<String>) {
         val start = meeting.first
         val end = meeting.second
 
+        // 다음 번에 진행될 회의는, 지난 번 회의 끝나는 시간과 같거나 커야 한다.
         if( start >= lastEndTime ) {
             count++
             lastEndTime = end
