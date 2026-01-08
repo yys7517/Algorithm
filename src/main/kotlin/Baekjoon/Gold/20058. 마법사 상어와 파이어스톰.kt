@@ -1,15 +1,14 @@
-package org.example.Baekjoon.Gold
 
 import java.util.*
 
 fun main() {
     val (N, Q) = readLine()!!.split(" ").map { it.toInt() }
 
-    var size = 1 shl N     // 전체 격자 길이
+    val length = 1 shl N     // 전체 격자 길이
 
-    val map = Array(size) {
+    val map = Array(length) {
         val st = StringTokenizer(readLine())
-        IntArray(size) { st.nextToken().toInt() }
+        IntArray(length) { st.nextToken().toInt() }
     }
 
     val dx = arrayOf(-1, 1, 0, 0)
@@ -19,7 +18,7 @@ fun main() {
     val st = StringTokenizer(readLine(), " ")
     while(st.hasMoreTokens()) {
         val L = st.nextToken().toInt()
-        val l = 1 shl L     // 부분 격자 길이
+        val subLength = 1 shl L     // 부분 격자 길이
 
         /* 시계방향 90도 배열 회전
          4x4 배열에서
@@ -34,16 +33,16 @@ fun main() {
 
          [i, j] -> [j, size - 1 - i]*/
 
-        val copiedMap = Array(size) { IntArray(size) }
+        val newBoard = Array(length) { IntArray(length) }
 
         // l씩 건너뛰면서 시작점을 기준으로, 회전을 시작.
-        for(startX in 0 until size step l) {
-            for(startY in 0 until size step l) {
+        for(startX in 0 until length step subLength) {
+            for(startY in 0 until length step subLength) {
                 // 회전 시작
-                for(i in 0 until l) {
-                    for(j in 0 until l) {
+                for(i in 0 until subLength) {
+                    for(j in 0 until subLength) {
 
-                        copiedMap[startX + i][startY +j] = map[l - 1 - j + startX][i + startY]
+                        newBoard[startX + i][startY +j] = map[subLength - 1 - j + startX][i + startY]
                         /* startX - 0
                          startY - 0
                          l = 4
@@ -71,104 +70,71 @@ fun main() {
             }
         }
 
-        val minus = Array(size) { BooleanArray(size) }
-
         // 인접한 얼음이 3개 미만이라면, 얼음을 녹인다.
-        for(x in 0 until size) {
-            for( y in 0 until size ) {
-                if(copiedMap[x][y] == 0) continue
+        val melt = Array(length) { BooleanArray(length) }
 
-                var count = 0
+        for(x in 0 until length) {
+            for( y in 0 until length ) {
+                if(newBoard[x][y] == 0) continue
+
+                var count = 0       // 인접한 얼음 개수
 
                 for(i in 0 until 4) {
                     val nx = x + dx[i]
                     val ny = y + dy[i]
 
-                    if(nx < 0 || ny < 0 || nx >= size || ny >= size) continue
-                    if( copiedMap[nx][ny] == 0 ) continue
+                    if(nx < 0 || ny < 0 || nx >= length || ny >= length) continue
 
-                    count++
+                    if(newBoard[nx][ny] > 0) count++
                 }
 
                 if(count < 3)
-                    minus[x][y] = true
+                    melt[x][y] = true
             }
         }
 
-        for(i in 0 until size) {
-            for( j in 0 until size ) {
-                map[i][j] = copiedMap[i][j]
-                if(minus[i][j] && map[i][j] > 0) map[i][j]--
+        for(i in 0 until length) {
+            for( j in 0 until length ) {
+                map[i][j] = newBoard[i][j]
+                if(melt[i][j] && map[i][j] > 0) map[i][j]--
             }
         }
     }
 
-    val visited = Array(size) { BooleanArray(size) }
+    val visited = Array(length) { BooleanArray(length) }
 
-    var cnt = 0
-    var max = 0
-    val sum = map.sumOf { it.sum() }
+    var iceCount = 0
+    var maxCount = 0
+    var sum = 0
 
+    // dfs로 영역 내 얼음 개수 세기
     fun dfs(x: Int, y: Int) {
-        if( map[x][y] == 0 || visited[x][y] ) return
+        if(map[x][y] == 0 || visited[x][y]) return
 
         visited[x][y] = true
-        cnt++
-        max = maxOf(max, cnt)
+        iceCount++
 
         for(i in 0 until 4) {
             val nx = x + dx[i]
             val ny = y + dy[i]
 
-            if( nx < 0 || ny < 0 || nx >= size || ny >= size ) continue
+            if(nx < 0 || ny < 0 || nx >= length || ny >= length) continue
+            if(visited[nx][ny]) continue
 
             dfs(nx, ny)
         }
     }
 
-    /*fun bfs() {
-        val queue = LinkedList<Pair<Int, Int>>()
-
-        for( i in 0 until size ) {
-            for ( j in 0 until size ) {
-                if(map[i][j] > 0 && !visited[i][j]) {
-                    queue.add(Pair(i,j))
-                    visited[i][j] = true
-
-                    cnt = 1
-
-                    while(queue.isNotEmpty()) {
-                        val tmp = queue.poll()
-
-                        val tx = tmp.first
-                        val ty = tmp.second
-
-                        for(i in 0 until 4) {
-                            val nx = tx + dx[i]
-                            val ny = ty + dy[i]
-
-                            if( nx < 0 || ny < 0 || nx >= size || ny >= size ) continue
-
-                            if(!visited[nx][ny] && map[nx][ny] > 0) {
-                                queue.add(Pair(nx, ny))
-                                visited[nx][ny] = true
-                                cnt++
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }*/
-
-    for(i in 0 until size) {
-        for(j in 0 until size) {
-            cnt = 0             // 얼음 덩어리(연결 요소)마다, 얼음 개수 초기화
+    for(i in 0 until length) {
+        for(j in 0 until length) {
+            sum += map[i][j]
+            iceCount = 0             // 얼음 덩어리(연결 요소)마다, 얼음 개수 초기화
             dfs(i, j)
+            maxCount = maxOf(maxCount, iceCount)   // 영역 하나 순회 다 마치고 나와서, max 값 갱신
         }
     }
 
-
+//    sum = map.sumOf { it.sum() }
     println(sum)
-    println(max)
+    println(maxCount)
 }
