@@ -1,16 +1,14 @@
 package org.example.Baekjoon.Silver
 
-import java.io.BufferedWriter
-import java.io.OutputStreamWriter
-
 fun main() {
-    val T = readLine()!!.toInt()
-    val bw = BufferedWriter(OutputStreamWriter(System.out))
+    val br = System.`in`.bufferedReader()
+    val bw = System.out.bufferedWriter()
 
+    val T = br.readLine().toInt()
     bw.use { bw ->
         repeat(T) {
-            val day = readLine()!!.toInt()
-            val arr = readLine()!!.split(" ").map { it.toInt() }
+            val day = br.readLine().toInt()
+            val arr = br.readLine().split(" ").map { it.toInt() }
 
             // 역 방향 탐색!
             // 뒤에서부터 가장 큰 주가를 찾아낸다.
@@ -19,7 +17,6 @@ fun main() {
             // ex) 1 1 3 1 2
             // 뒤에 있는 1은 2에 판매하는게 가장 유리하고,
             // 앞에 있는 1 1은 3에 판매하는게 가장 유리하다.
-
             var result = 0L
             var max = 0
 
