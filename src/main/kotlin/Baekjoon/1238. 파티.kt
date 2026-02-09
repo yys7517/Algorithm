@@ -2,7 +2,6 @@ package org.example.Baekjoon
 
 import java.util.*
 
-
 data class Node(
     val idx: Int,
     val cost: Int,
@@ -29,38 +28,8 @@ fun main() {
         reversedGraph[end].add(Node(start, cost))
     }
 
-    fun findDist(start: Int, adj: Array<MutableList<Node>>): IntArray {
-        val dist = IntArray(N + 1) { Int.MAX_VALUE }
-        val visited = BooleanArray(N + 1)
-
-        val pq = PriorityQueue<Node>()
-        pq.add(Node(start, 0))
-        dist[start] = 0
-
-        while (pq.isNotEmpty()) {
-            val nowVertex = pq.poll().idx
-
-            if (visited[nowVertex]) continue
-            visited[nowVertex] = true
-
-            for (nextNode in adj[nowVertex]) {
-                val nextVertex = nextNode.idx
-                val cost = nextNode.cost
-
-                // 인접한 nextVertex로 갈 수 있는 거리를 최단거리로 갱신.
-                if(dist[nextVertex] > dist[nowVertex] + cost) {
-                    dist[nextVertex] = dist[nowVertex] + cost
-                    pq.add(Node(nextVertex, dist[nextVertex]))
-                }
-            }
-        }
-//        println(dist.slice(1..N))
-
-        return dist
-    }
-
-    val distFromX = findDist(X, graph)          // X에서 출발 -> 오는 길
-    val distToX = findDist(X,reversedGraph)   // 역방향 그래프를 기준으로 X에서 출발 -> 가는 길
+    val distFromX = findDist(N, X, graph)          // X에서 출발 -> 오는 길
+    val distToX = findDist(N, X,reversedGraph)   // 역방향 그래프를 기준으로 X에서 출발 -> 가는 길
 
     for(i in 1..N) {
         if( i == X ) continue
@@ -69,4 +38,35 @@ fun main() {
     }
 
     print(max)
+}
+
+private fun findDist(n: Int, start: Int, graph: Array<MutableList<Node>>): IntArray {
+
+    val dist = IntArray(n + 1) { Int.MAX_VALUE }
+    val visited = BooleanArray(n + 1)
+
+    val pq = PriorityQueue<Node>()
+    pq.add(Node(start, 0))
+    dist[start] = 0
+
+    while (pq.isNotEmpty()) {
+        val nowVertex = pq.poll().idx
+
+        if (visited[nowVertex]) continue
+        visited[nowVertex] = true
+
+        for (nextNode in graph[nowVertex]) {
+            val nextVertex = nextNode.idx
+            val cost = nextNode.cost
+
+            // 인접한 nextVertex로 갈 수 있는 거리를 최단거리로 갱신.
+            if(dist[nextVertex] > dist[nowVertex] + cost) {
+                dist[nextVertex] = dist[nowVertex] + cost
+                pq.add(Node(nextVertex, dist[nextVertex]))
+            }
+        }
+    }
+//        println(dist.slice(1..N))
+
+    return dist
 }
