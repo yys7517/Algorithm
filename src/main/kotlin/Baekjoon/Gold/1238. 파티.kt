@@ -1,4 +1,4 @@
-package org.example.Baekjoon
+package org.example.Baekjoon.Gold
 
 import java.util.*
 
