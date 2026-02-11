@@ -33,12 +33,18 @@ package org.example.LeetCode
  */
 
 fun twoSum(nums: IntArray, target: Int): IntArray {
-    for( i in 0 until nums.size-1 ) {
-        for( j in i+1..nums.size-1 ) {
-            if( nums[i] + nums[j] == target ) {
-                return intArrayOf(i, j)
-            }
+    val map = hashMapOf<Int, Int>()     // value to Idx
+
+    nums.forEachIndexed { idx, value ->
+        val complement = target - value     // Pair를 찾기 위한 수
+
+        // Pair를 이루는 수가 있다면
+        if(map.containsKey(complement)) {
+            return intArrayOf(map[complement]!!, idx)   // 이미 그 인덱스 이전에 찾은 것이므로, idx를 뒤로 리턴
         }
+
+        // 값 저장
+        map[value] = idx
     }
 
     return intArrayOf()
