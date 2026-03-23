@@ -1,6 +1,7 @@
 package Programmers.Level_1;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 class Solution_영어끝말잇기 {
     public int[] solution(int n, String[] words) {

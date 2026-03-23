@@ -1,8 +1,9 @@
 package Programmers.Level_2;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Queue;
 
-class Programmers_거리두기_확인 {
+class Solution_거리두기_확인 {
     public int[] solution(String[][] places) {
         int[] answer = {1,1,1,1,1};
 

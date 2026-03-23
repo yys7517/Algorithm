@@ -3,7 +3,7 @@ package Programmers.Level_2;
 import java.util.Arrays;
 import java.util.Stack;
 
-public class Programmers_뒤에있는큰수 {
+public class Solution_뒤에있는큰수 {
     public int[] solution(int[] numbers) {
         int[] answer = new int[numbers.length];
 

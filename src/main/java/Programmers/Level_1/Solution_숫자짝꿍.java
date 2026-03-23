@@ -1,6 +1,6 @@
 package Programmers.Level_1;
 
-public class Programmers_숫자짝꿍 {
+public class Solution_숫자짝꿍 {
     public String solution(String X, String Y) {
         String answer = "";
 
