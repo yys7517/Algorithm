@@ -4,45 +4,45 @@ import java.util.*;
 
 public class Solution_여행경로 {
     public String[] solution(String[][] tickets) {
-        List<String> path = new ArrayList<>();              // 경로
-        boolean[] visited = new boolean[tickets.length];    // 티켓 사용 여부를 체크하는 방문 배열
+        List<String> path = new ArrayList<>();
+        boolean[] visited = new boolean[tickets.length];
 
-        // 만일 가능한 경로가 2개 이상일 경우에는 알파벳 순서가 앞서는 경로를 return
+        // 출발 지점이 같다면, 도착지점을 기준으로 오름차순 정렬
         Arrays.sort(tickets,
                 (a, b) -> a[0].equals(b[0]) ? a[1].compareTo(b[1]) : a[0].compareTo(b[0])
-        );  // 출발 지점이 같다면, 도착지점 기준으로 오름차순 정렬
+        );
 
-        int count = 0;      // 티켓 사용 개수.
+        // ICN 출발
         path.add("ICN");
+        int count = 0;
+        dfs("ICN", path, tickets, visited, count);
 
-        dfs("ICN", tickets, visited, path, count);
         return path.toArray(new String[0]);
     }
 
-    // 해당 경로로 쭉 갈 수 있는지, 아니면 다시 돌아와야 하는지 알기 위해 boolean 타입을 반환형으로 둔다.
-    private boolean dfs(String current, String[][] tickets, boolean[] visited, List<String> path, int count) {
-        // 모든 티켓을 사용했다면, 여행 경로를 더 출력할 필요가 없다.
-        if (count == tickets.length) {
+    // 모든 항공권을 사용할 수 있는지 아닌지, 경로를 다시 되돌아오기 위한 boolean 값 설정
+    static boolean dfs(String curr, List<String> path, String[][] tickets, boolean[] visited, int count) {
+        // 티켓을 모두 사용한 경우, 종료. true 반환
+        if(count == tickets.length) {
             return true;
         }
 
-        for (int i = 0; i < tickets.length; i++) {
+        for(int i = 0; i < tickets.length; i++) {
             String[] ticket = tickets[i];
-
-            // 현재 위치가 출발점인 티켓을 찾았다면, && 티켓을 사용하지 않았다면
-            if ( !visited[i] && ticket[0].equals(current) ) {
-                String dest = ticket[1];    // 도착지점
+            // curr과 같은 출발지점 티켓이고, 사용하지 않은 티켓이라면
+            if( !visited[i] && ticket[0].equals(curr) ) {
+                String dest = ticket[1];
                 visited[i] = true;
                 path.add(dest);
 
-                // 이 경로로 쭉 갈 수 있는지 확인
-                if( dfs(dest, tickets, visited, path, count + 1) ) {
-                    return true;
+                // 백트래킹 종료 전파
+                if( dfs(dest, path, tickets, visited, count + 1) ) {
+                    return true;    // 이미 티켓을 모두 사용하고, 경로를 모두 출력했을 경우 종료.
                 }
 
-                // 다른 경로로 가기 위해 다시 돌아와야 한다면? (백트래킹)
-                path.remove( path.size() - 1 );
+                // 티켓을 모두 사용하지 못했다면 BackTracking을 통해, 방문을 취소하고, 경로 다시 탐색
                 visited[i] = false;
+                path.remove( path.size() - 1 );
             }
         }
 
