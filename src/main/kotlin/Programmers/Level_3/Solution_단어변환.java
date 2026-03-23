@@ -1,70 +1,34 @@
 package Programmers.Level_3;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
 public class Solution_단어변환 {
-    static class WordState {
-        String word;
-        int count;
-
-        WordState(String word, int count) {
-            this.word = word;
-            this.count = count;
-        }
-    }
+    static int minCount = Integer.MAX_VALUE;
 
     public int solution(String begin, String target, String[] words) {
-        boolean hasTarget = false;
+        boolean[] visited = new boolean[words.length];
 
-        // 배열은 contains를 사용할 수 없음
-        for(int i = 0 ; i < words.length; i++) {
-            if( words[i].equals(target) ) {
-                hasTarget = true;
-            }
-        }
+        int count = 0;
+        dfs(begin, target, words, count, visited);
 
-        // 변환할 수 없는 경우에는
-        if( !hasTarget ) {
-            return 0;
-        }
-
-        WordState state = new WordState(begin, 0);
-
-        int answer = bfs(state, target, words);
-
-        return answer;
+        return minCount == Integer.MAX_VALUE ? 0 : minCount;
     }
 
-    private static int bfs(WordState state, String target, String[] words) {
-        boolean[] visited = new boolean[words.length];
-        Queue<WordState> queue = new LinkedList<>();
+    private static void dfs(String curr, String target, String[] words, int count, boolean[] visited) {
+        // target으로 변환에 성공했다면, count 리턴
+        if( curr.equals(target) ) {
+            minCount = Math.min(minCount, count);
+            return;     // 새로운 최솟값을 찾았으므로, 다음 최솟값을 찾으러 return
+        }
 
-        queue.add(state);
+        for(int i = 0; i < words.length; i++) {
+            if( !visited[i] && canConvert(curr, words[i]) ) {
 
-        while( !queue.isEmpty() ) {
-            WordState curr = queue.poll();
+                visited[i] = true;
+                dfs( words[i], target, words, count + 1, visited );
 
-            String currWord = curr.word;
-            int currCount = curr.count;
-
-            // System.out.println(currWord);
-
-            if( currWord.equals(target) ) {
-                return currCount;
+                //
+                visited[i] = false;
             }
-
-            for(int i = 0; i < words.length; i++) {
-                // 이미 체크한 단어가 아니고, 변환 가능하다면
-                if( !visited[i] && canConvert( currWord, words[i]) ) {
-                    // System.out.println(words[i]);
-                    visited[i] = true;
-                    queue.add( new WordState( words[i], currCount + 1) );
-                }
-            }   // End for
-        }   // End While
-
-        return 0;
+        }
     }
 
     /** 한 번에 한 개의 알파벳만 바꿀 수 있다. */
