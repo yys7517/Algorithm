@@ -22,11 +22,6 @@ public class 숫자카드2 {
             arr[i] = Integer.parseInt( st.nextToken() );
         }
 
-        // M = Integer.parseInt(br.readLine());
-
-        // visited = new boolean[N+1];
-        // sb = new StringBuilder();
-        // answer = new int[M];
         M = Integer.parseInt(br.readLine());
         sb = new StringBuilder();
 
@@ -54,7 +49,7 @@ public class 숫자카드2 {
 
             if(arr[mid] > num) {
                 // 너가 num보다 커?
-                // 그럼 왼쪽도 더 볼게
+                // 그럼 정답이 될 수도 있지만, 왼쪽도 더 확인해볼게
                 right = mid;
             } else {
                 // arr[mid] <= num
@@ -77,7 +72,7 @@ public class 숫자카드2 {
 
             if(arr[mid] >= num) {
                 // 너가 num보다 크거나 같아?
-                // 그럼 왼쪽에 더 있는지 보자
+                // 그럼 정답이 될 수도 있겠네. 혹시 모르니까 왼쪽에 그런 값이 더 있는지 확인해 보자
                 right = mid;
             } else {
                 // num보다 작아?
