@@ -3,73 +3,93 @@ package Programmers.Level_3;
 import java.util.*;
 
 public class Solution_합승택시요금 {
-    public int solution(int n, int s, int a, int b, int[][] fares) {
-        int answer = Integer.MAX_VALUE;
+    // 지점의 개수 n
+    // 출발지점 s
 
-        List<List<int[]>> adj = new ArrayList<>();
+    // a, b - 도착지점
+
+    // fares - 예상 택시 요금 [출발지, 도착지, 요금]
+    // 요금 - 가중치
+    // 다익스트라
+
+    static ArrayList<ArrayList<int[]>> adj;
+    static final int INF = Integer.MAX_VALUE;
+
+    public int solution(int n, int s, int a, int b, int[][] fares) {
+        int answer = INF;
+
+        adj = new ArrayList<>();
         for(int i = 0; i <= n; i++) {
             adj.add(new ArrayList<>());
         }
 
         for(int i = 0; i < fares.length; i++) {
-            int start = fares[i][0];
-            int end = fares[i][1];
-            int cost = fares[i][2];
+            int[] info = fares[i];
+            int from = info[0];
+            int to = info[1];
+            int cost = info[2];
 
-            // 양방향이다.
-            adj.get(start).add(new int[] {end, cost});
-            adj.get(end).add(new int[] {start, cost});
+            adj.get(from).add(new int[] {to, cost});
+            adj.get(to).add(new int[] {from , cost});
         }
 
-        // S -> i + i -> A + i -> B (입출력 1)
-        // S -> A + S -> B (입출력 2) -> 합승 x
-        // S -> B + B -> A (입출력 3)
+        int[] distS = dijkstra(n, s); // 출발지에서 각 지점까지의 거리를 다 찾아보자.
+        int[] distA = dijkstra(n, a);
+        int[] distB = dijkstra(n, b);
 
-        int[] distS = dikstra(s, adj, n);
-        int[] distA = dikstra(a, adj, n);
-        int[] distB = dikstra(b, adj, n);
+        // 경유지 어떻게 ?? >> 하나씩 다 돌아보자..
+        for( int i = 1; i <= n; i++ ) {
+            // i를 경유지라고 했을 때
 
-        // 경유지를 for문으로 설정, i값에 따라, 경유지가 없어지기도 해야함.. 잘 생각해보자..
-        // S -> i + i -> A + i -> B (입출력 1)
-        // S -> A + S -> B (입출력 2) -> 합승 x
-        // S -> B + B -> A (입출력 3)
-        for(int i = 1; i <= n; i++) {
-            // i == S 일때, A-S + B-S -> (합승x + 입출력 2)
-            // i == A일때, S-A + A-B -> (합승 + 입출력 3)
-            // i == B일때, S-B + A-B -> (합승 + 입출력 3)
-            // i값이 제 4의 영역일 때, (경유지일 때) S -> i + i -> A + i -> B (입출력 1)
-            int sum = distS[i] + distA[i] + distB[i];
-            answer = Math.min(answer, sum);
+            // distS[i] = 출발지 - 경유지
+            // distA[i] = 경유지 - A
+            // distB[i] = 경유지 - B
+
+            // 만약, 아예 합승을 하지 않고 각자 이동하는 경우의 예상 택시요금이 더 낮다면, 합승을 하지 않아도 됩니다.
+            // 합승을 안하고 가는 경우, 경유지를 거쳐 가는 경우 >> 둘 중 최소 요금을 return
+
+            // 경유지가 출발지인 경우는 체크할 필요 없을듯
+            // 출발해서 갈 수 없는 경유지라면? skip
+            // **** A랑 B에서도 갈 수 있는 경유지인지 체크해야함 *****
+            if( distS[i] == INF || distA[i] == INF || distB[i] == INF ) continue;
+
+            // 합승을 하지 않는 경우 - distS[a] + distS[b]
+            // 합승을 하는 경우 - 경유지가 어디인가?
+
+            answer = Math.min( answer, distS[i] + distA[i] + distB[i] );
         }
 
         return answer;
     }
 
-    static int[] dikstra(int start, List<List<int[]>> adj, int n) {
+    static int[] dijkstra(int n, int start) {
         int[] dist = new int[n+1];
         Arrays.fill(dist, Integer.MAX_VALUE);
+
+        PriorityQueue<int[]> pq = new PriorityQueue<>( (a,b) -> Integer.compare(a[1], b[1]));
+
         dist[start] = 0;
+        pq.add(new int[] {start, 0});
 
-        PriorityQueue<int[]> pq = new PriorityQueue<>((a,b) -> a[1] - b[1]);
-        pq.add( new int[] {start, 0} );
+        while(!pq.isEmpty()) {
+            int[] curr = pq.poll();
 
-        while( !pq.isEmpty() ) {
-            int[] currNode = pq.poll();
-            int now = currNode[0];
-            int cost = currNode[1];
+            int v = curr[0];
+            int cost = curr[1];
 
-            if( dist[now] < cost ) continue;
+            if( dist[v] < cost ) continue;
 
-            for( int[] nextNode : adj.get(now) ) {
+            for( int[] nextNode: adj.get(v) ) {
                 int next = nextNode[0];
                 int nextCost = nextNode[1];
 
-                if( dist[next] > dist[now] + nextCost ) {
-                    dist[next] = dist[now] + nextCost;
-                    pq.add( new int[] { next, dist[next] } );
+                if( dist[next] > dist[v] + nextCost ) {
+                    dist[next] = dist[v] + nextCost;
+                    pq.add(new int[] {next, dist[next]});
                 }
             }
-        }
+        } // End While
+
 
         return dist;
     }
