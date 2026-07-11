@@ -3,61 +3,92 @@ package Programmers.Level_3;
 import java.util.*;
 
 public class Solution_부대복귀 {
-    public int[] solution(int n, int[][] roads, int[] sources, int destination) {
-        int[] answer = new int[sources.length]; // 출발 인원 수만큼
-        Arrays.fill(answer, -1);
+    // 가중치는 모두 1로 동일... 굳이 다익스트라? BFS로 풀이해도 될듯
+    // 총 지역 수 n
+    // roads는 간선 정보 - [출발지, 도착지]
 
-        // sources - 부대원 위치
-        // destination - 도착지점
-        List<List<int[]>> adj = new ArrayList<>();
+    // destination - 복귀해야 할 곳 도착지
+
+    // sources는 출발 부대이고
+    // sources 순서대로 복귀할 수 있는 최단 시간을 return
+
+    // 출발지가 여러 개이고, 도착지가 하나이다.
+    // roads에 있는 길 정보는, 왕복이 가능하다.
+    // 그냥 도착지에서 출발했을 때, 각 지점에 도착하는 데에 걸린 시간을 구하면 더 편리하다.
+
+    static ArrayList<ArrayList<int[]>> adj;
+    static final int INF = Integer.MAX_VALUE;
+
+    public int[] solution(int n, int[][] roads, int[] sources, int destination) {
+
+        adj = new ArrayList<>();
         for(int i = 0; i <= n; i++) {
             adj.add(new ArrayList<>());
         }
 
-        for(int[] road: roads) {
-            int start = road[0];
-            int end = road[1];
+        for(int i = 0; i < roads.length; i++) {
+            int[] info = roads[i];
 
-            // 양방향 (왕복 가능), 가중치 1
-            adj.get(start).add(new int[] {end, 1});
-            adj.get(end).add(new int[] {start, 1});
+            int from = info[0];
+            int to = info[1];
+
+            adj.get(from).add(new int[] {to, 1});
+            adj.get(to).add(new int[] {from, 1});
         }
 
-        // 양방향이므로, 목적지에서 출발하면!
-        // 모든 부대원들이 목적지로 돌아올 수 있는지, 있다면 얼마나 걸리는지 다익스트라 한 번만에 알 수 있다.
-        int[] dist = dikstra( adj, n, destination);
+        int[] dist = bfs(n, sources, destination);
 
+        int[] answer = new int[sources.length];
         for(int i = 0; i < sources.length; i++) {
-            answer[i] = dist[sources[i]] == Integer.MAX_VALUE ? -1 : dist[sources[i]];
+            int num = sources[i];
+
+            answer[i] = dist[num] < INF ? dist[num] : -1;   // 갱신되지 않은 곳은 못 가는 곳이므로, -1
         }
 
         return answer;
     }
 
-    static int[] dikstra( List<List<int[]>> adj, int n, int start ) {
-        PriorityQueue<int[]> pq = new PriorityQueue<>((a,b) -> a[1] - b[1]);
-        pq.add(new int[] {start, 0});
-
+    // 도착지에서 출발하는 다익스트라, 거리 배열을 구하자
+    static int[] bfs(int n, int[] destinations, int start) {
         int[] dist = new int[n+1];
-        Arrays.fill(dist, Integer.MAX_VALUE);
+        Arrays.fill(dist, INF);
 
+        // Queue<int[]> q = new LinkedList<>();
+        Queue<Integer> q = new LinkedList<>();
+
+        // q.add(new int[] {start, 0});
+        q.add(start);
         dist[start] = 0;
 
-        while( !pq.isEmpty() ) {
-            int[] curr = pq.poll();
-            int now = curr[0];
-            int cost = curr[1];
+//         while(!q.isEmpty()) {
+//             int[] curr = q.poll();
+//             int v = curr[0];
+//             int cost = curr[1];
 
-            if( dist[now] < cost ) continue;
+//             if (dist[v] < cost) continue;
 
-            for( int[] nextNode : adj.get(now) ) {
+//             for( int[] nextNode: adj.get(v) ) {
+//                 int next = nextNode[0];
+//                 int nextCost = nextNode[1];
+
+//                 if( dist[next] > dist[v] + nextCost ) {
+//                     dist[next] = dist[v] + nextCost;
+//                     q.add(new int[] { next, dist[next] });
+//                 }
+//             }
+//         }
+
+        while(!q.isEmpty()) {
+            int curr = q.poll();
+
+            for( int[] nextNode : adj.get(curr) ) {
                 int next = nextNode[0];
-                int nextCost = nextNode[1];
 
-                if( dist[next] > dist[now] + nextCost ) {
-                    dist[next] = dist[now] + nextCost;
-                    pq.add(new int[] { next, dist[next] });
-                }
+                // 이미 INF가 아니고, 최소 거리를 찾았으면, 그게 최단거리다. 왜냐하면, 가중치가 모두 1로 같은 BFS
+                if( dist[next] != INF ) continue;
+
+                dist[next] = dist[curr] + 1;
+                q.add(next);
             }
         }
 
