@@ -6,62 +6,80 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 public class Solution_배달 {
+    // 양방향 통행 가능
+    // 가중치가 모두 다름
+
+    // N개의 마을
+
+    // 1번에서 출발
+
+    // K시간 이하로 배달이 가능한 곳만 간다.
+    // 배달이 가능한 곳의 개수를 return
+
+    // road - [마을 a, 마을 b, 거리]
+
+    static ArrayList<ArrayList<int[]>> adj;
+
     public int solution(int N, int[][] road, int K) {
         int answer = 0;
 
-        // 1 ~ N 까지 이동거리 저장 배열
-        int[] dist = new int[N+1];
-        Arrays.fill(dist, Integer.MAX_VALUE);
-        dist[1] = 0;    // 1번에서 출발
-
-        List<List<int[]>> adj = new ArrayList<>();
+        adj = new ArrayList<>();
         for(int i = 0; i <= N; i++) {
             adj.add(new ArrayList<>());
         }
 
-        for(int[] info : road) {
-            int start = info[0];
-            int end = info[1];
+        for(int i = 0; i < road.length; i++) {
+            int[] info = road[i];
+            int from = info[0];
+            int to = info[1];
             int cost = info[2];
 
-            // 양방향 통행 가능
-            adj.get(start).add(new int[] {end, cost});
-            adj.get(end).add(new int[] {start, cost});
+            adj.get(from).add( new int[] { to, cost });
+            adj.get(to).add(new int[] { from, cost });
         }
 
-        // cost 기준 오름차순 정렬, cost가 짧은 값 부터
-        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[1] - b[1]);
-        pq.add(new int[] {1, 0});
+        answer = dijkstra(N, K);
 
-        while( !pq.isEmpty() ) {
+        return answer;
+    }
+
+    static int dijkstra(int N, int K) {
+        int[] dist = new int[N+1];
+        Arrays.fill(dist, Integer.MAX_VALUE);
+
+        PriorityQueue<int[]> pq = new PriorityQueue<>( (a,b) -> Integer.compare(a[1], b[1]) );  // 가중치 가까운 순으로 정렬
+
+        // 시작점은 1이다.
+        dist[1] = 0;
+        pq.add(new int[] { 1, 0 });
+
+        while(!pq.isEmpty()) {
             int[] curr = pq.poll();
 
-            int now = curr[0];
+            int v = curr[0];
             int cost = curr[1];
 
-            if(dist[now] < cost) continue;
+            if( dist[v] < cost ) continue;  // v로 갈 수 있는 시간 중, 이미 구한 값이 더 최소 값이라면 skip
 
-            // 이동 가능한 곳
-            for( int[] nextNode : adj.get(now) ) {
+            for( int[] nextNode: adj.get(v) ) {
                 int next = nextNode[0];
                 int nextCost = nextNode[1];
 
-                // 거리 값 새로 갱신
-                if( dist[next] > dist[now] + nextCost ) {
-                    dist[next] = dist[now] + nextCost;
-
+                if( dist[next] > dist[v] + nextCost ) {
+                    dist[next] = dist[v] + nextCost;
                     pq.add(new int[] { next, dist[next] });
                 }
             }
         }
 
-        // 1~N까지 K 시간 이하로 이동이 가능한 곳
+        // dist 배열을 완성했으면
+
+        // K 이하로 배달 가능한 마을의 수
+        int count = 0;
         for(int i = 1; i <= N; i++) {
-            if(dist[i] <= K) {
-                answer++;
-            }
+            if( dist[i] <= K ) count++;
         }
 
-        return answer;
+        return count;
     }
 }
