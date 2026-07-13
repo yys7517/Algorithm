@@ -1,62 +1,64 @@
 package Programmers.Level_3;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.PriorityQueue;
+import java.util.*;
 
 public class Solution_가장먼노드 {
+    // 노드의 개수 n
+    // edges - [a, b] 노드 a,b 사이에 간선이 있다
+    // 1번 노드에서 가장 멀리 떨어진 노드의 갯수는?
+
+    // 다익스트라로, 1번 노드에서 출발해서, 각 노드에 가는 거리를 구하자.
+    // 근데 그냥 BFS로 구할 수 있을듯
+    // 간선의 가중치가 모두 1로 동일해서
+
+    static ArrayList<ArrayList<Integer>> adj;
+
     public int solution(int n, int[][] edges) {
         int answer = 0;
 
-        List<List<int[]>> adj = new ArrayList<>();
+        int[] dist = new int[n+1];
+        Arrays.fill(dist, -1);
+
+        adj = new ArrayList<>();
         for(int i = 0; i <= n; i++) {
             adj.add(new ArrayList<>());
         }
 
-        // 간선 가중치 정보가 주어지지 않았고, 간선의 개수가 가장 많은 노드가 가장 멀리 떨어진것 = 가중치 1로 두자
         for(int[] edge: edges) {
-            int start = edge[0];
-            int end = edge[1];
+            int from = edge[0];
+            int to = edge[1];
 
-            // 간선은 양방향
-            adj.get(start).add(new int[] {end, 1});
-            adj.get(end).add(new int[] {start, 1});
+            adj.get(from).add(to);
+            adj.get(to).add(from);
         }
 
-        int[] dist = new int[n+1];
-        Arrays.fill(dist, Integer.MAX_VALUE);
-        dist[1] = 0;    // 1번 노드에서 출발
 
-        PriorityQueue<int[]> pq = new PriorityQueue<>( (a, b) -> a[1] - b[1] );
-        pq.add(new int[] {1,0});
+        dist[1] = 0;
 
-        while(!pq.isEmpty()) {
-            int[] curr = pq.poll();
-            int now = curr[0];
-            int cost = curr[1];
+        Queue<Integer> q = new ArrayDeque<>();
+        q.add(1);
 
-            if(dist[now] < cost) continue;
+        while(!q.isEmpty()) {
+            int curr = q.poll();
 
-            for( int[] nextNode: adj.get(now) ) {
-                int next = nextNode[0];
-                int nextCost = nextNode[1];
+            for(int next: adj.get(curr) ) {
+                if(dist[next] != -1) continue;      // 이미 방문한 곳이면, 스킵
 
-                if(dist[next] > dist[now] + nextCost) {
-                    dist[next] = dist[now] + nextCost;
-                    pq.add( new int[] { next, dist[next] });
-                }
+                dist[next] = dist[curr] + 1;
+                q.add(next);
             }
         }
 
-        int maxDist = Integer.MIN_VALUE;
+        int max = -1;
+
         for(int i = 1; i <= n; i++) {
-            // System.out.println(dist[i]);
-            if(maxDist < dist[i]) maxDist = dist[i];
+            if( dist[i] == -1 ) continue;   // 방문되지 않은 곳, 갈 수 없는 정점이다.
+            max = Math.max( max , dist[i] );
         }
 
         for(int i = 1; i <= n; i++) {
-            if(dist[i] == maxDist) answer++;
+            if( dist[i] == -1 ) continue;   // 방문되지 않은 곳, 갈 수 없는 정점이다.
+            if( dist[i] == max ) answer++;
         }
 
         return answer;
