@@ -1,44 +1,44 @@
 package Programmers.Level_3;
 
 public class Solution_순위 {
+    // 선수의 수 n
     public int solution(int n, int[][] results) {
         int answer = 0;
 
-        // winner[i][j] == true , i가 j를 이긴 것.
         boolean[][] isWinner = new boolean[n+1][n+1];
-        for(int[] result : results) {
-            int winner = result[0];
-            int loser = result[1];
 
-            isWinner[winner][loser] = true;
+        for(int[] result: results) {
+            // a가 b를 이겼다
+            int a = result[0];
+            int b = result[1];
+
+            isWinner[a][b] = true;
         }
 
-        // 정보가 파편화 되어있기 때문에, 플로이드-와샬을 사용하자.
-        for(int k = 1; k <= n; k++) {
-            for(int i = 1; i <= n; i++) {
-                for(int j = 1; j <= n; j++) {
-                    if( isWinner[i][k] && isWinner[k][j] ) {    // i가 k를 이겼고, k가 j를 이겼으면,
-                        isWinner[i][j] = true;  //  i가 j를 이긴 것과 같다.
-                    }
+        for(int mid = 1; mid <= n; mid++) {
+            for(int start = 1; start <= n; start++) {
+                for(int end = 1; end <= n; end++) {
+                    // k가 i를 이기고, i가 j를 이겼다면, k는 j도 이길 수 있는 것과 같다.
+                    if( isWinner[start][mid] && isWinner[mid][end] ) isWinner[start][end] = true;
                 }
             }
         }
 
-        for(int i = 1; i <= n; i++) {
-            int winnerCount = 0;    // i를 이긴 사람
-            int loserCount = 0;     // i한테 진 사람
+        // 정확하게 순위를 매길 수 있는 선수의 수?
+        // 자신이 이긴 사람의 수 + 자신이 진 사람의 수 = n-1 일 때만, 정확하게 순위를 매길 수 있다.
+        for(int me = 1; me <= n; me++) {
+            int winCount = 0;
+            int loseCount = 0;
 
-            for(int j = 1; j <= n; j++) {
-                if(i == j) continue;
+            for(int enemy = 1; enemy <= n; enemy++) {
+                if( me == enemy ) continue;
 
-                if(isWinner[i][j]) loserCount++;    // i가 j를 이겼나?
-                if(isWinner[j][i]) winnerCount++;   // j가 i를 이겼나?
+                if(isWinner[me][enemy]) winCount++;  // 자신이 이겼나
+                if(isWinner[enemy][me]) loseCount++; // 자신이 졌나?
             }
 
-            // 두 결과의 합이 n-1이면, 순위를 알 수 있음.
-            if(winnerCount + loserCount == n - 1) answer++;
+            if(winCount + loseCount == n-1) answer++;
         }
-
 
         return answer;
     }
