@@ -3,64 +3,57 @@ package Programmers.Level_2;
 import java.util.*;
 
 public class Solution_전력망둘로나누기 {
+    ArrayList<ArrayList<Integer>> adj;
+
     public int solution(int n, int[][] wires) {
         int answer = Integer.MAX_VALUE;
 
-        List<List<Integer>> adj = new ArrayList<>();
-        for(int i = 0; i <= n; i++) {
-            adj.add(new ArrayList<>());
-        }
+        // 전선 하나 골라서 끊어보자.
+        for(int wireNum = 0; wireNum < wires.length; wireNum++) {
+            adj = new ArrayList<>();
+            for(int i = 0; i <= n; i++) {
+                adj.add(new ArrayList<>());
+            }
 
-        for(int[] wire : wires) {
-            int start = wire[0];
-            int end = wire[1];
+            // 전선 하나 끊은 상태의 인접 그래프 생성
+            for(int i = 0; i < wires.length; i++) {
+                if( i == wireNum ) continue;    // i번째 전선 끊어보기.
 
-            adj.get(start).add(end);
-            adj.get(end).add(start);
-        }
+                int v1 = wires[i][0];
+                int v2 = wires[i][1];
 
-        for(int[] wire: wires) {
-            // 하나씩 지우고 BFS나 DFS 돌려서 개수 세보기
-            int start = wire[0];
-            int end = wire[1];
+                // v1-v2 연결
+                adj.get(v1).add(v2);
+                adj.get(v2).add(v1);
+            }
 
-            // 하나 끊기
-            adj.get(start).remove(Integer.valueOf(end));
-            adj.get(end).remove(Integer.valueOf(start));
+            // BFS 돌려보자.
+            Queue<Integer> q = new ArrayDeque<>();
+            boolean[] visited = new boolean[n+1];
 
-            int count1 = bfs(adj, n);
-            int count2 = n - count1;
+            // 1번 송전탑에서 출발하자
+            int count = 1;      // BFS 돌려서, 한 번 탐색에서 개수 찾기
+            q.add(1);
+            visited[1] = true;
 
-            answer = Math.min(answer, Math.abs(count1 - count2));
+            while(!q.isEmpty()) {
+                int curr = q.poll();
 
-            // 다시 연결해주기
-            adj.get(start).add(end);
-            adj.get(end).add(start);
-        }
+                for(int next: adj.get(curr)) {
+                    if( !visited[next] ) {
+                        q.add(next);
+                        visited[next] = true;
+                        count++;
+                    }
+                }
+            }
+
+            // 송전탑 개수는 각각
+            // count 개, n - count개
+            answer = Math.min(answer, Math.abs(count - (n - count)));   // 송전탑 차이 최소값
+
+        } // End 전선 하나 끊기
 
         return answer;
     }
-
-    static int bfs(List<List<Integer>> adj, int n) {
-        boolean[] visited = new boolean[n+1];
-        int count = 0;
-
-        Queue<Integer> queue = new LinkedList<>();
-        queue.add(1);
-        visited[1] = true;
-
-        while( !queue.isEmpty() ) {
-            int now = queue.poll();
-            count++;
-
-            for( int next : adj.get(now) ) {
-                if( !visited[next] ) {
-                    queue.add(next);
-                    visited[next] = true;
-                }
-            }// End bfs for
-        } // End bfs while
-
-        return count;
-    }// End bfs
 }
