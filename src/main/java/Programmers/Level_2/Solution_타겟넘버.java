@@ -1,39 +1,21 @@
 package Programmers.Level_2;
 
 public class Solution_타겟넘버 {
-
     public int solution(int[] numbers, int target) {
-        int index = 0;
-        int sum = 0;
-        int answer = dfs(numbers, target, index, sum);
+        int answer = 0;
+
+        answer = dfs(numbers, 0, 0, target);
 
         return answer;
     }
 
+    static int dfs(int[] numbers, int idx, int sum, int target) {
+        if( idx == numbers.length ) {   // idx가 length와 같을 때는, 모든 수를 조회 완료한거임
+            if( sum == target ) return 1;   // 타겟 넘버면 방법의 수 1 리턴
 
-    private static int dfs(int[] numbers, int target, int index, int sum) {
-        // 모든 숫자를 사용했을 때, index 값은 numbers의 인덱스 범위를 벗어난다. ( = 모든 수를 탐색했다)
-        if( index >= numbers.length ) {
-            if( sum == target ) {   // target과 같다면, 하나의 방법을 찾은거다.
-                return 1;
-            } else {
-                return 0;   // target값이 아니면 그건 방법이 아니다.
-            }
+            return 0;
         }
 
-//        더하거나 빼서 target값을 만들기 위해
-//        if(index >= 0 && index < numbers.length) {
-//            int add = dfs(numbers, target, index + 1, sum + numbers[index]);
-//            int sub = dfs(numbers, target, index + 1, sum - numbers[index]);
-//
-//            return add + sub;
-//        }
-//
-//        return 0;
-
-        int add = dfs(numbers, target, index + 1, sum + numbers[index]);
-        int sub = dfs(numbers, target, index + 1, sum - numbers[index]);
-
-        return add + sub;
+        return dfs(numbers, idx + 1, sum + numbers[idx], target) + dfs(numbers, idx + 1, sum - numbers[idx], target);
     }
 }
