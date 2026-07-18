@@ -10,7 +10,7 @@ public class Solution_외판원순회 {
     // costs[a][b] - a에서 b까지 이동하는 비용
 
     static int[][] dp;      // dp[current][mask] 현재 masking된 상태에서 돌아가기까지 하는 최소비용
-    static int n;   // 도시의 개수
+    static int N;   // 도시의 개수
 
     static final int INF = Integer.MAX_VALUE;
 
@@ -42,48 +42,46 @@ public class Solution_외판원순회 {
     }
 
     static int solution(int[][] costs) {
-        n = costs.length;
-        dp = new int[n][1<<n];  // [0][1<<0] ~ [n-1][ (1<<n) -1]
-
-        for(int i = 0; i < dp.length; i++) {
+        N = costs.length;
+        dp = new int[N][1 << N];
+        for(int i = 0; i < N; i++) {
             Arrays.fill(dp[i], -1);
         }
 
-        // 0에서 출발하자
-        int startMask = 1 << 0;   // 현재 마스킹 상태
         int current = 0;
+        int mask = 1 << 0;
 
-        return dfs(costs, current, startMask);
+        return dfs(costs, current, mask);
     }
 
     static int dfs(int[][] costs, int current, int mask) {
-        int fullMask = (1 << n) - 1;
+        int fullMask = ( 1 << N ) -1;
 
-        // 모든 도시를 방문했는가?
-        if( mask == fullMask ) {
-            return costs[current][0] == 0 ? INF : costs[current][0];   // 다시 시작지점으로 돌아간다.
+        if( mask == fullMask ) {    // 모든 도시를 방문했나?
+            return costs[current][0] == 0 ? INF : costs[current][0];    // 출발점으로 다시 돌아가는 비용
         }
 
-        // 메모이제이션
         if( dp[current][mask] != -1 ) {
             return dp[current][mask];
         }
 
+        // 다음 도시로 이동
         int minCost = INF;
+        for(int next = 0; next < N; next++) {
 
-        for(int next = 0; next < n; next++) {
-            // 이미 방문된 도시인가?
-            if( ( mask & (1 << next) ) != 0 ) continue;
+            // 이미 방문한 곳인가?
+            if( ( mask & ( 1 << next ) ) != 0 ) continue;
 
-            // current == next, 자기 자신의 도시인가?
+            // 자기 자신으로 이동 X
             if( costs[current][next] == 0 ) continue;
 
-            int nextMask = mask | (1 << next); // 다음 도시 방문
-            int nextCost = dfs(costs, next, nextMask);
+            int nextMask = mask | ( 1 << next );
 
-            if( nextCost == INF ) continue;     // 순회할 수 없는 경로인가?
+            int remain = dfs(costs, next, nextMask);
+            if( remain == INF ) continue;   // 출발지로 돌아올 수 없는 경로인가?
 
-            int totalCost = costs[current][next] + nextCost;
+            int totalCost = costs[current][next] + remain;
+
             minCost = Math.min(minCost, totalCost);
         }
 
