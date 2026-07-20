@@ -1,86 +1,88 @@
 package Programmers.Level_2;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 
 class Solution_거리두기_확인 {
+    // (r1, c1), (r2, c2) 사이의 맨해튼 거리 = |r1-r2| + |c1-c2|
+    // 행과 열 좌표 차이의 합
+
+    // 응시자 간에는 맨해튼 거리 2 이하이면 안됨, 3이상
+    // 사이에 파티션이 있으면 상관없음
+
+    // P - 응시자
+    // O - 테이블
+    // X - 파티션
+
     public int[] solution(String[][] places) {
-        int[] answer = {1,1,1,1,1};
+        int[] answer = {};
+        answer = new int[5];
+        Arrays.fill(answer, 1);
 
-        // P: 응시자
-        // O: 빈 테이블
-        // X: 파티션
+        int idx = 0;
 
-        for(int i = 0; i < 5; i++) {
+        for( String[] place: places ) {
             char[][] map = new char[5][5];
 
-            for(int j = 0; j < 5; j++ ) {
-                String line = places[i][j];
-
-                for( int k = 0; k < 5; k++ ) {
-                    map[j][k] = line.charAt(k);
+            for( int i = 0; i < 5; i++ ) {
+                for(int j = 0; j < 5; j++) {
+                    map[i][j] = place[i].charAt(j);
                 }
             }
 
-            for(int x = 0; x < 5; x++) {
-                for(int y = 0; y < 5; y++) {
-                    if(map[x][y] == 'P') {
-                        if(!bfs(x,y,map)) {
-                            answer[i] = 0;
+            for( int i = 0; i < 5; i++ ) {
+                for(int j = 0; j < 5; j++) {
+                    if(map[i][j] == 'P') {
+                        if( !BFS(i,j,map) ) {
+                            answer[idx] = 0;
                         }
                     }
                 }
             }
 
-        }   // End for places
+            idx++;
+        }
+
         return answer;
     }
 
-
-    private boolean bfs(int sx, int sy, char[][] map) {
-        // BFS로 2까지만 탐색
-        Queue<int[]> queue = new LinkedList<>();
+    static boolean BFS(int sx, int sy, char[][] map) {
         boolean[][] visited = new boolean[5][5];
 
-        queue.add(new int[] {sx, sy, 0});
+        Queue<int[]> q = new LinkedList<>();
+        q.add(new int[] {sx, sy, 0});
         visited[sx][sy] = true;
 
-        int[] dx = {-1, 1, 0, 0};
-        int[] dy = {0, 0, -1, 1};
+        int[] dx = {-1,1,0,0};
+        int[] dy = {0,0,-1,1};
 
-        while(!queue.isEmpty()) {
-            int[] info = queue.poll();
-            int x = info[0];
-            int y = info[1];
-            int dist = info[2];
+        while(!q.isEmpty()) {
+            int[] curr = q.poll();
 
-            // Queue에서 꺼내온 값이 2이면, 이미 2인 지점까지 다 확인함.
-            if(dist >= 2) continue;// 다음으로 거리가 3인 지점을 Queue에서 뽑아와서 확인할 필요 x
+            int x = curr[0];
+            int y = curr[1];
+            int dist = curr[2];
+
+            // 거리가 2인 부분 까지만 확인하자.
+            if(dist >= 2) continue; // 거리가 2인 부분에서 탐색을 계속하면, 거리가 3인 지점을 찾게 된다.
 
             for(int i = 0; i < 4; i++) {
                 int nx = x + dx[i];
                 int ny = y + dy[i];
 
-                // 좌표 범위에서 불가능하거나, 방문된 곳인지..
-                if(!isPossible(nx, ny) || visited[nx][ny]) continue;
-                if(map[nx][ny] == 'X') continue;    // 파티션은 피해서 간다..
+                if( nx < 0 || nx >= 5 || ny < 0 || ny >= 5 ) continue;
+                if( map[nx][ny] == 'X' ) continue;  // 파티션인가?
+                if( visited[nx][ny] ) continue;     // 방문한 곳인가?
 
-                queue.add(new int[] { nx, ny, dist + 1 });
-                visited[nx][ny] = true;
-
-                // 파티션을 지나지 않으면서 맨해튼 거리가 2인 지점에서 또 다른 P를 만난다면
-                if(map[nx][ny] == 'P') {
-                    return false;   // 거리두기 실패!
+                // 거리 2이하에서 응시자를 발견하면, 거리두기 실패
+                if( map[nx][ny] == 'P' ) {
+                    return false;
                 }
-            } // End for
-        }// End while
 
-        return true;   // 거리두기 성공!
-    } // End bfs
-
-    private boolean isPossible(int x, int y) {
-        if(x < 0 || x >= 5 || y < 0 || y >= 5) {
-            return false;
+                q.add(new int[] {nx, ny, dist + 1});
+                visited[nx][ny] = true;
+            }
         }
 
         return true;
