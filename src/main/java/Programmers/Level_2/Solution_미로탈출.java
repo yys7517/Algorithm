@@ -3,106 +3,89 @@ package Programmers.Level_2;
 import java.util.*;
 
 public class Solution_미로탈출 {
-    static class Node {
-        int x;
-        int y;
-
-        Node(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-    }
-
-    static int[][] visited;
-    static int R, C;
-
-    static int[] dx = {-1,1,0,0};
-    static int[] dy = {0,0,1,-1};
+    static int rows;
+    static int cols;
 
     public int solution(String[] maps) {
-        int answer = 0;
 
-        R = maps.length;
-        C = maps[0].length();
+        rows = maps.length;
+        cols = maps[0].length();
+
+        // 출구 문을 개방하기 위해 레버를 당겨야 함.
+
+        // 레버를 들렸다가, 출구로 가야함
+        // S - L + L - E 이 최단 경로
+        char[][] map = new char[rows][cols];
 
         int sx = 0;
         int sy = 0;
-        int lx = 0;
-        int ly = 0;
+
         int ex = 0;
         int ey = 0;
 
-        for(int i = 0; i < R; i++) {
-            for(int j = 0;  j < C; j++) {
-                char ch = maps[i].charAt(j);
+        int lx = 0;
+        int ly = 0;
 
-                if( ch == 'S' ) {
+        for(int i = 0; i < maps.length; i++) {
+            for(int j = 0; j < maps[i].length(); j++) {
+                map[i][j] = maps[i].charAt(j);
+
+                if( map[i][j] == 'S' ) {
                     sx = i;
                     sy = j;
                 }
 
-                if( ch == 'E' ) {
+                if( map[i][j] == 'E' ) {
                     ex = i;
                     ey = j;
                 }
 
-                if( ch == 'L' ) {
+                if( map[i][j] == 'L' ) {
                     lx = i;
                     ly = j;
                 }
             }
         }
 
-        Node start = new Node(sx, sy);
-        Node lever = new Node(lx, ly);
-        Node end = new Node(ex, ey);
+        int t1 = bfs(map, sx, sy, lx, ly);
+        if (t1 == -1) return -1;
 
-        int distStartToLever = bfs(start, lever, maps);
-        int distLeverToEnd = bfs(lever, end, maps);
+        int t2 = bfs(map, lx, ly, ex, ey);
+        if (t2 == -1) return -1;
 
-        // System.out.println("distStartToLever = " + distStartToLever);
-        // System.out.println("distLeverToEnd = " + distLeverToEnd);
-
-        if( distStartToLever == -1 || distLeverToEnd == -1 ) {
-            return -1;
-        }
-
-        answer = distStartToLever + distLeverToEnd;
-
-        return answer;
+        return t1 + t2;
     }
 
-    static int bfs(Node start, Node end, String[] maps) {
-        Queue<Node> q = new LinkedList<>();
-        visited = new int[R][C];
-        for(int i = 0; i < R; i++) {
-            Arrays.fill( visited[i], -1 );
-        }
+    // (sx, sy) -> (ex, ey)로 이동하는 최단 거리
+    static int bfs(char[][] map, int sx, int sy, int ex, int ey) {
+        Queue<int[]> q = new ArrayDeque<>();
+        q.add(new int[] {sx, sy, 0});
 
-        q.add(start);
-        visited[start.x][start.y] = 0;
+        boolean[][] visited = new boolean[rows][cols];
+        visited[sx][sy] = true;
+
+        int[] dx = {-1,1,0,0};
+        int[] dy = {0,0,-1,1};
 
         while(!q.isEmpty()) {
-            Node curr = q.poll();
+            int[] curr = q.poll();
 
-            int x = curr.x;
-            int y = curr.y;
+            int x = curr[0];
+            int y = curr[1];
+            int dist = curr[2];
 
-            if( x == end.x && y == end.y ) {
-                return visited[x][y];
-            }
+            if(x == ex && y == ey) return dist;
 
             for(int i = 0; i < 4; i++) {
                 int nx = x + dx[i];
                 int ny = y + dy[i];
 
-                if( nx < 0 || ny < 0 || nx >= R || ny >= C ) continue;
-                if( maps[nx].charAt(ny) == 'X' ) continue;  // 벽이면 스킵
-                if( visited[nx][ny] != -1 ) continue;       // 이미 방문한 곳이면 스킵
+                if( nx < 0 || ny < 0 || nx >= rows || ny >= cols ) continue;
+                if( map[nx][ny] == 'X' ) continue;  // 벽
+                if( visited[nx][ny] ) continue;
 
-                // System.out.println("next X: " + nx + " Y: " + ny);
-                visited[nx][ny] = visited[x][y] + 1;
-                q.add(new Node(nx, ny));
+                q.offer(new int[] {nx, ny, dist + 1});
+                visited[nx][ny] = true;
             }
         }
 
