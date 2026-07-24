@@ -3,85 +3,87 @@ package Programmers.Level_2;
 import java.util.*;
 
 public class Solution_리코쳇로봇 {
-
-    static int[] dx = {-1,1,0,0};
-    static int[] dy = {0,0,-1,1};
-
-    static int[][] map;
-
-    static int r, c;
-    static int sr, sc;      // 시작 위치
-    static int er, ec;      // 도착 위치
+    static int rows;
+    static int cols;
 
     public int solution(String[] board) {
         int answer = 0;
 
-        r = board.length;
-        c = board[0].length();
+        rows = board.length;
+        cols = board[0].length();
 
-        map = new int[r][c];
+        int sx = 0;
+        int sy = 0;
 
-        Queue<int[]> q = new LinkedList<>();
-        boolean[][] visited = new boolean[r][c];
+        int ex = 0;
+        int ey = 0;
 
-        for(int i = 0; i < board.length; i++) {
-            for(int j = 0; j < board[i].length(); j++) {
-                if( board[i].charAt(j) == 'R' ) {
-                    sr = i;
-                    sc = j;
-                    map[i][j] = 0;    // 시작점
+        char[][] map = new char[rows][cols];
 
-                    q.add(new int[] {i, j});
-                    visited[i][j] = true;
+        for(int i = 0; i < rows; i++) {
+            for(int j = 0; j < cols; j++) {
+                map[i][j] = board[i].charAt(j);
 
-                } else if( board[i].charAt(j) == 'D' ) {
-                    map[i][j] = -1;
-                } else if( board[i].charAt(j) == 'G' ) {
-                    er = i;
-                    ec = j; // 도착점
-                    map[i][j] = Integer.MAX_VALUE;
+                if( map[i][j] == 'R' ) {
+                    sx = i;
+                    sy = j;
+                }
 
-                } else {
-                    map[i][j] = Integer.MAX_VALUE;
+                if( map[i][j] == 'G' ) {
+                    ex = i;
+                    ey = j;
                 }
             }
         }
 
+        int dist = bfs(map, sx, sy, ex, ey);
+
+        return dist;
+    }
+
+    static int bfs(char[][] map, int sx, int sy, int ex, int ey) {
+        Queue<int[]> q = new ArrayDeque<>();
+        q.offer(new int[] {sx, sy, 0});
+
+        boolean[][] visited = new boolean[rows][cols];
+        visited[sx][sy] = true;
+
+        int[] dx = {-1,1,0,0};
+        int[] dy = {0,0,-1,1};
+
         while(!q.isEmpty()) {
             int[] curr = q.poll();
 
-            // 현재 위치
             int x = curr[0];
             int y = curr[1];
+            int dist = curr[2];
+
+            if( x == ex && y == ey ) return dist;
 
             for(int i = 0; i < 4; i++) {
                 int nx = x;
                 int ny = y;
 
-                // 게임판 위의 장애물이나 게임판 가장자리까지 부딪힐 때까지 미끄러져 움직이는 것을 한 번의 이동
+                // 쭉 미끄러져 이동
                 while(true) {
                     nx += dx[i];
                     ny += dy[i];
 
-                    if( nx < 0 || ny < 0 || nx >= r || ny >= c ) break;
-                    if( map[nx][ny] == -1 ) break;
+                    if( nx < 0 || ny < 0 || nx >= rows || ny >= cols ) break;
+                    if( map[nx][ny] == 'D' ) break;
                 }
 
-                // 장애지점을 만나서 멈춘 것이므로, 한 칸 빠꾸해야함
+                // 좌표를 벗어났거나, 장애물일 때, while문이 종료되므로, 한 칸 다시 돌아온다.
                 nx -= dx[i];
                 ny -= dy[i];
 
-                if( !visited[nx][ny] ) {
-                    // 현재 위치로 오기까지 이동 횟수 갱신
-                    map[nx][ny] = map[x][y] + 1;
+                if( visited[nx][ny] ) continue;
 
-                    q.add(new int[] { nx, ny });
-                    visited[nx][ny] = true;
-                }
-
+                q.offer(new int[] {nx, ny, dist + 1});
+                visited[nx][ny] = true;
             }
         }
 
-        return map[er][ec] == Integer.MAX_VALUE ? -1 : map[er][ec];
+        return -1;
     }
 }
